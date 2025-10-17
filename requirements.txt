@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+httpx
+python-dotenv
+pydantic
+pytest
+pytest-asyncio
+pytest-mock
+PyYAML
+gitpython
+aiofiles
+python-multipart
+PyGithub
+Pillow
+pytesseract
+
