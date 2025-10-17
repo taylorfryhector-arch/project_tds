@@ -1,4 +1,3 @@
-# Fixed Python Script
 # /// script
 # requires-python = ">=3.11"
 # dependencies = [
@@ -8,51 +7,45 @@
 
 import requests
 import base64
-import os
+import random
 
-# ----------------------
-# Load sample captcha
-# ----------------------
-file_path = "text_image.png"
-if not os.path.exists(file_path):
-    raise FileNotFoundError(f"{file_path} not found.")
+# Generate a seed for uniqueness
+seed = random.randint(1000, 9999)
 
-with open(file_path, "rb") as f:
-    file_bytes = f.read()
+# Optional: example placeholder for markdown/content (not strictly needed here)
+# content = f"GitHub User Fetcher Seed: {seed}"
 
-captcha_base64 = base64.b64encode(file_bytes).decode()
+# Base64 encoding is not strictly needed here but keeping consistent pattern
+seed_str = str(seed)
+seed_base64 = base64.b64encode(seed_str.encode("utf-8")).decode()
 
-# ----------------------
-# Payload
-# ----------------------
+# Construct payload for Round 1
 payload = {
     "email": "student@example.com",
     "secret": "praneetha",
-    "task": "captcha-solver-demo-318",
+    "task": "github-user-created",
     "round": 1,
-    "nonce": "ab123-nonce-teste",
-    "brief": (
-        "Create a captcha solver web app that takes ?url=https://example.com/captcha.png "
-        "as a query parameter and displays both the image and its solved text. "
-        "If no URL is given, use the attached sample captcha image."
-    ),
-    "evaluation_url": "https://webhook.site/21c9e554-87bf-48a4-8220-9101bad7f00f",
-    "attachments": [
-        {
-            "name": "captcha.png",
-            "url": f"data:image/png;base64,{captcha_base64}"
-        }
+    "nonce": f"unique-nonce-{seed}",
+    "brief": f"Publish a Bootstrap page with form id='github-user-{seed}' that fetches a GitHub username, optionally uses ?token=, and displays the account creation date in YYYY-MM-DD UTC inside #github-created-at.",
+    "evaluation_url": "https://webhook.site/your-webhook-url",  # replace with your actual URL
+    "attachments": [],
+    "checks": [
+        {"js": f'document.querySelector("#github-user-{seed}").tagName === "FORM"'},
+        {"js": 'document.querySelector("#github-created-at").textContent.includes("20")'},
+        {"js": 'document.querySelector("script").textContent.includes("https://api.github.com/users/")'}
     ]
 }
 
-# ----------------------
-# FIXED: Correct URL without /api/
-# ----------------------
+# Hugging Face Space endpoint
 HF_API_URL = "https://taylorfry-projectds.hf.space/handle_request"
 
+# Send the request
 try:
     response = requests.post(HF_API_URL, json=payload, timeout=30)
     print("Status Code:", response.status_code)
-    print("Response:", response.json() if response.headers.get('content-type') == 'application/json' else response.text)
+    if response.headers.get('content-type') == 'application/json':
+        print("Response JSON:", response.json())
+    else:
+        print("Response Text:", response.text)
 except Exception as e:
-    print("Error:", e)
+    print("Error sending request:", e)
